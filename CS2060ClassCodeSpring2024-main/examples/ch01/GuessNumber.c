@@ -33,6 +33,8 @@ void guessGame(void) {
    int guess = 0;
 
    // 
+   printf(“Hello Deb”);
+
    do {
 
       // 
