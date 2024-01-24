@@ -4,7 +4,39 @@
 
 // function main begins program execution 
 int main(void) {
+
+	//Variables
+	int length = 0;
+	int width = 0;
+	int area = 0;
+	double avgOfWidthLength = 0;
+
+   //Wlecome the user in
    printf("Welcome to C!\n");
+   puts("Enter the length");
+   
+   //Take in length from the user's keyboard
+   scanf("%d", &length);
+ 
+  
+   //Prompt the user to input width, scan in width from keyboard, & store the input in variable width
+   puts("Now enter the width");
+   scanf("%d", &width);
+  
+   //Calculate area by multiplying length & width
+   area = (length * width);
+
+   //Print out all information, including the inputted length, inputted width, and calculated area
+   printf("The length is: %d\n", length);
+	printf("The width is: %d\n", width);
+   printf("And so, the area is: %d\n", area);
+
+   //Find the average of the width and length
+   avgOfWidthLength = ((double)length + (double)width) / 2;
+   printf("The average of the width & length is: %.1f", avgOfWidthLength);
+
+
+   return 0;
 } // end function main 
 
 
