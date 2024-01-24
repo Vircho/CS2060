@@ -30,11 +30,11 @@ int main(void) {
 void guessGame(void) {
     
     //Initializes ints response and guess to 0
-   int response =0;
+   int response = 0;
    int guess = 0;
 
    //Prints "Hello Deb" for GitHub practice 
-   printf("Hello Deb");
+   puts("Hello Deb");
 
    do {
 
@@ -66,7 +66,7 @@ void guessGame(void) {
       puts("\nExcellent! You guessed the number!\n"
          "Would you like to play again?");
       printf("%s", "Please type (1=yes, 2=no)? ");
-      scanf("%d", &response);
+      scanf("%d", & response);
       puts("");
 
    } while (response == 1);
