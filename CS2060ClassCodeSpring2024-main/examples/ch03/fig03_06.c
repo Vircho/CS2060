@@ -1,6 +1,13 @@
 // fig03_06.c
 // Analysis of examination results.
 #include <stdio.h>
+#include <stdbool.h>
+
+/* Temporary Comment
+* Modify the program so that on any input, if the value entered is other than 1 or 2, 
+* keep looping until the user enters a correct value. This means if a non numeric value 
+*is entered the program should handle that situation.
+*/
 
 // function main begins program execution 
 int main(void) {
@@ -14,7 +21,28 @@ int main(void) {
       // prompt user for input and obtain value from user 
       printf("%s", "Enter result (1=pass,2=fail): ");
       int result = 0; // one exam result 
-      scanf("%d", &result);
+      bool dataIsGood = false; // represents if the user inputted a 1/2, or invalid data
+
+      do {
+          int scanfReturnValue = scanf("%d", &result); // scanfReturnValue sees if the user input causes an error or not (1 = success) (0 = error)
+          while ((getchar()) != '\n'); // clears the buffer so that the system doesn't take in enter
+
+          if (scanfReturnValue == 1) {
+
+              if (result <= 0 || result >= 3) { // if the scanf didn't return an error, check if it's a valid integer (1 or 2)
+                  puts("Enter a valid integer: 1 = pass, 2 = fail");
+              }
+              else {
+                  dataIsGood = true;
+              }
+          }
+          else {
+              puts("Enter a valid integer: 1 = pass, 2 = fail");
+          }
+
+          
+
+      } while (!dataIsGood);
 
       // if result 1, increment passes 
       if (result == 1) {     
