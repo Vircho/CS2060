@@ -2,6 +2,8 @@
 // A first program in C.
 #include <stdio.h>
 
+double calculateArea(double length, double width);
+
 // function main begins program execution 
 int main(void) {
 
@@ -16,12 +18,22 @@ int main(void) {
    puts("Enter the length");
    
    //Take in length from the user's keyboard
+   //scanfReturn = 
    scanf("%d", &length);
- 
-  
+   //while (!scanfReturn <= 0) {
+	  // puts("Please enter a valid number (>0)");
+	   //scanfReturn = scanf("%d", &length);
+   //}
+
    //Prompt the user to input width, scan in width from keyboard, & store the input in variable width
    puts("Now enter the width");
+   //scanfReturn = 
    scanf("%d", &width);
+   //while (scanfReturn <= 0) {
+	  // puts("Please enter a valid number (>0)");
+	   //scanfReturn = scanf("%d", &width);
+   //}
+
   
    //Calculate area by multiplying length & width
    area = (length * width);
@@ -33,11 +45,23 @@ int main(void) {
 
    //Find the average of the width and length
    avgOfWidthLength = ((double)length + (double)width) / 2;
-   printf("The average of the width & length is: %.1f", avgOfWidthLength);
+   printf("The average of the width & length is: %.1f\n", avgOfWidthLength);
 
+   //Find the average length & width in a function
+   area = calculateArea(length, width);
+   printf("The area as returned from function calculateArea in main is: %d\n", area);
 
    return 0;
 } // end function main 
+
+// function calculateArea calculates area from passed length & width
+double calculateArea(double length, double width) {
+
+	double area = (length * width);
+	printf("The area as calculated in function calculateArea is: %.1f\n", area);
+	return area;
+
+} // end function calculateArea
 
 
 
