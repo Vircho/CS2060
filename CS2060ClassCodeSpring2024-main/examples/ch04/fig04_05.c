@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 int main(void) {
+
    int aCount = 0;
    int bCount = 0; 
    int cCount = 0; 
