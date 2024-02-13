@@ -1,10 +1,13 @@
 //Project iteration 01 - UCCS RIDE SHARE
-/*Joshua White - CS2060-002 - Professor Harding
+/*
+* Name: Joshua White
+* Class: CS2060 T/R 1:40-2:55
+* OS: Windows 11
+* Due: 2/13/24 11:59 PM
 * 
-* Prompts & takes in input for miles to be driven from the user, then estimates amount of minutes
-* that the ride will take by randomizing between a min and max. Then calculate fare of the ride
-* and print for the user their ID, the miles to be ridden, the minutes it will take, and the cost
-* of the ride. A business summary can be seen by the owner by inputting the sentinal value
+* Description: Prompts and takes in input from user for amount of miles their ride will be. Then estimates time in minutes of ride 
+* and calculates the fare of the ride and prints all obtained and calculated information. If the sentinal value is inputted for miles, 
+* a summary of all information since the program began running is printed.
 */
 
 #include <stdio.h>
@@ -26,8 +29,9 @@ void endProgram(int users, double miles, int minutes, double profit);
 
 // function main
 /*
-* main keeps the needed variables and calls the needed functions within a loop that runs
-* until the sentinal value to end the program is entered.
+* -> Keeps variables and calls functions until sentinal value is entered
+* returns: nothing
+* parameters: none
 */
 int main (void) {
 
@@ -87,10 +91,10 @@ int main (void) {
 
 // function getValidDouble
 /*
-*  getValidDouble takes in input from user and checks for if the user inputted a valid double
-* (double value from min to max)
-* [takes in: min: the minimum value the user can input. max: the maximum value the user can input.
-* sentinal: the value that will end the program when inputted]
+* -> takes in input from user and checks for if the user inputted a valid double (double value from min to max)
+* returns: the data that user inputted 
+* paramters: (min: minimum value that can be entered) (max: maximum value that can be entered) (sentinal: if input is sentinal, endProgram() gets
+* called in main)
 */
 double getValidDouble(int min, int max, int sentinal) {
 
@@ -101,9 +105,12 @@ double getValidDouble(int min, int max, int sentinal) {
 	do {
 
 		printf("Input miles: (%d - %d)", min, max);
+
+		// scanf() returns 1 or 0 on success or error. %lf takes in a double value. & points to the address of userInput
 		int scanfReturn = scanf("%lf", &userInput);
 		while ((getchar()) != '\n');
 
+		// Catches any errors the scanf() returns, and if no errors are returned, checks for valid input.
 		if (scanfReturn == 1) {
 
 			if ((userInput > max || userInput < min) && userInput != sentinal) {
@@ -121,14 +128,16 @@ double getValidDouble(int min, int max, int sentinal) {
 		}
 
 	} while (!dataIsGood);
+	// Keep user in do-while loop until they input good data
 
 	return userInput;
 } // end getValidDouble
 
 // function estimateMinutes
 /*
-* estimateMinutes randomzes an int value from MIN & MAX RAND_MINUTES_FACTOR multiplied
-* by taken in miles. 
+* -> randomzes an int value from MIN/MAX_RAND_MINUTES_FACTOR multiplied by taken in miles. 
+* returns: randomized value
+* parameters: (miles: the miles inputted in getValidDouble(), used to calculate max/min)
 */
 int estimateMinutes(double miles) {
 
@@ -140,8 +149,7 @@ int estimateMinutes(double miles) {
 	int min = minMinutes;
 	int max = maxMinutes;
 
-
-	// Randomizeeee
+	// Randomize the minutes between min & max
 	srand(time(0));
 	int randomMinutes = min + rand() % (max - min + 1);
 
@@ -150,8 +158,12 @@ int estimateMinutes(double miles) {
 
 // function calculateFare
 /*
-* calculateFare calculates returns a fare using the equation base + (minuteCost * minutes) + (mileCost * miles)
-* If the calculated fare is less than minRate, then it is set to equal min rate.
+* -> calculates returns a fare using the equation base + (minuteCost * minutes) + (mileCost * miles) If the calculated fare is less than minRate, 
+* then it is set to equal min rate.
+* returns: calculated fare
+* parameters: (base: the base fare that the fare will start at) (minuteCost: amount of money per 1 minute) (mileCost: amount of money per miles)
+* (minRate: the minimum fee that can be charged) (miles: amount of miles inputted in getValidDouble) (minutes: amount of minutes calculated in
+* estimateMinutes)
 */
 double calculateFare(double base, double minuteCost, double mileCost, double minRate, double miles, int minutes) {
 
@@ -167,7 +179,10 @@ double calculateFare(double base, double minuteCost, double mileCost, double min
 
 // function printFare
 /*
-* printFare prints the fare calculated in the calculateFare function. The table is organized with \t format speccifiers.
+* -> prints the fare calculated in the calculateFare function. The table is organized with \t format speccifiers.
+* returns: nothing
+* parameters: (count: the userID, or how many users before the current + 1) (miles: miles inputted in getValidDouble()) (minutes: minuted calculated
+* in estimateMinutes()) (fare: fare calculated in calculateFare())
 */
 void printFare(int count, double miles, int minutes, double fare) {
 
@@ -178,9 +193,11 @@ void printFare(int count, double miles, int minutes, double fare) {
 
 // function endProgram
 /*
-* endProgram is called when the sentinal value is entered in the getValidDouble function.
-* It prints the total values defined in main and passed to this function, in a table
-* organized with \t format specifiers.
+* -> called when the sentinal value is entered in the getValidDouble function. It prints the total values defined in main and passed to this 
+* function, in a table organized with \t format specifiers.
+* returns: nothing
+* parameters: (users: total number of users since program started) (miles: sum of all inputted miles) (minutes: sum of all estimated minutes)
+* (profit: sum of all calculated fares)
 */
 void endProgram(int users, double miles, int minutes, double profit) {
 
