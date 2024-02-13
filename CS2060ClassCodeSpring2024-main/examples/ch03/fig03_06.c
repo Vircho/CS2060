@@ -40,8 +40,6 @@ int main(void) {
               puts("Enter a valid integer: 1 = pass, 2 = fail");
           }
 
-          
-
       } while (!dataIsGood);
 
       // if result 1, increment passes 
