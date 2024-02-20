@@ -5,11 +5,16 @@
 
 // function prototypes
 void modifyArray(int b[], size_t size); 
-void modifyElement(int e);              
+void modifyElement(int e);
+void displayArray(const int aArray[], size_t size);
  
 // function main begins program execution
 int main(void) {
    int a[SIZE] = {0, 1, 2, 3, 4}; // initialize array a
+
+   //Show the addresses of both the array and the first element of the array to show that they are the same
+   printf("The address of the array: %d\n", &a);
+   printf("The address of the element: %d\n", &a[0]);
 
    puts("Effects of passing entire array by reference:\n\nThe "
       "values of the original array are:");
@@ -37,6 +42,9 @@ int main(void) {
 
    // output value of a[3]
    printf("The value of a[3] is %d\n", a[3]);
+
+   // Print elements of array in function
+   displayArray(a, SIZE);
 } 
 
 // in function modifyArray, "b" points to the original array "a" in memory
@@ -53,6 +61,18 @@ void modifyElement(int e) {
    e *= 2; // multiply parameter by 2                                  
    printf("Value in modifyElement is %d\n", e);            
 } 
+
+void displayArray(const int aArray[], size_t size) {
+
+    puts("");
+    puts("Printing array elements in function now");
+
+    for (size_t i = 0; i < size; i++) {
+
+        printf("Array at element %d: %d\n", i, aArray[i]);
+
+    }
+}
 
 
 
