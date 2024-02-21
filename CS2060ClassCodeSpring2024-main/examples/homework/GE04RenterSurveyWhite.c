@@ -21,7 +21,7 @@
 
 //Function prototypes
 void printCategories(const char* categories[], size_t totalCategories);
-void getRatings(int survey[SURVEY_ROWS][SURVEY_COLUMNS], size_t rows, size_t columns, const char* categories[]);
+void getRatings(int survey[SURVEY_ROWS][SURVEY_COLUMNS], size_t rows, size_t columns, const char* categories[], int user);
 void printSurveyResults();
 void calculateCategoryAverages();
 void printCategoryData();
@@ -35,8 +35,15 @@ int main(void) {
 	int categoryAverages[SURVEY_CATEGORIES];
 	const char* surveyCategories[SURVEY_CATEGORIES] = { "Safety", "Cleanliness", "Comfort" };
 
-    //Get ratings from the user
-    getRatings(rideshareSurvey, SURVEY_ROWS, SURVEY_COLUMNS, surveyCategories);
+    //Initialize other variables
+    int surveyTaker = 1;
+    
+    while (surveyTaker <= SURVEY_ROWS) {
+
+        //Get ratings from the user
+        getRatings(rideshareSurvey, SURVEY_ROWS, SURVEY_COLUMNS, surveyCategories, surveyTaker);
+
+    }
 }
 
 void printCategories(const char* categories[], size_t totalCategories)
@@ -50,19 +57,20 @@ void printCategories(const char* categories[], size_t totalCategories)
     puts(""); // start new line of output
 }
 
-void getRatings(int survey[SURVEY_ROWS][SURVEY_COLUMNS], size_t rows, size_t columns, const char* categories[]) {
+void getRatings(int survey[SURVEY_ROWS][SURVEY_COLUMNS], size_t rows, size_t columns, const char* categories[], int user) {
 
     //Prompts for the user to input a score and lets them know what they can input
     puts("Thank you for using the UCCS RideShare!");
     puts("We would like to know how your experience with us was.");
-    puts("Please enter a score for these categories from %d to %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
+    printf("Please enter a score for these categories from %d to %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
+    puts(""); //newline
     printCategories(categories, SURVEY_CATEGORIES);
 
     // for loop goes through the columns of the survey[][] array to get the necessary scores one-by-one.
     for (size_t place = 0; place < SURVEY_CATEGORIES; place++) {
 
         // asks the user to input for the category in the place currently having an input entered for
-        printf("How did you feel about the %s?", categories[place]);
+        printf("How did you feel about the %s? \n", categories[place]);
 
         // initialize boolean for valid data, and variable for user input
         bool dataIsGood = false;
@@ -82,25 +90,16 @@ void getRatings(int survey[SURVEY_ROWS][SURVEY_COLUMNS], size_t rows, size_t col
                     dataIsGood = true;
                 }
                 else {
-                    puts("You did not input a valid score. Vald scores are whole numbers between %d and %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
+                    printf("You did not input a valid score. Vald scores are whole numbers between %d and %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
                 }
             }
             else {
-                puts("You did not input a valid score. Vald scores are whole numbers between %d and %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
+                printf("You did not input a valid score. Vald scores are whole numbers between %d and %d", MIN_SURVEY_VALUE, MAX_SURVEY_VALUE);
             }
         } while (!dataIsGood);
 
-        // for loop runs through all of the rows of the survey in the column currently beng inputted to check for data already inside of the row
-        // when an empty row is found, it adds the userScore to the empty row inside of the right column
-        for (size_t row = 0; row < SURVEY_ROWS; row++) {
-
-            if (survey[row][place] >= MIN_SURVEY_VALUE && survey[row][place] <= MAX_SURVEY_VALUE) {
-                // no code, the loop moves on to the next row
-            }
-            else {
-                survey[row][place] = userScore;
-            }
-        }
+        // Once valid data is obtained, put the data into the 2d array at current collumn in the for-loop and row current user as defined in parameters
+        survey[user][place] = userScore;
     }
 }
 
