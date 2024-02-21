@@ -201,8 +201,13 @@ void printFare(int count, double miles, int minutes, double fare) {
 */
 void endProgram(int users, double miles, int minutes, double profit) {
 
-	puts("Summary of program since last activation:");
-	printf("Users \t Miles ridden \t Minutes ridden \t Fares collected \n");
-	printf("%d \t %.1f \t %d \t $%.2f \n", users, miles, minutes, profit);
+	if (users == 1) {
+		puts("No riders since last activation");
+	}
+	else {
+		puts("Summary of program since last activation:");
+		printf("Users \t Miles ridden \t Minutes ridden \t Fares collected \n");
+		printf("%d \t %.1f \t %d \t $%.2f \n", users, miles, minutes, profit);
+	}
 
 } // end endProgram
