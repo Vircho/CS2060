@@ -15,7 +15,12 @@ void printLimits(void);
 
 int main(void)
 {
+	//array of chars called inputStr with indexes 0-19
 	char inputStr[LENGTH]; // create char array
+
+	exploreValidateInt("3");
+	exploreValidateInt("x");
+	exploreValidateInt("3x");
 
     printLimits();
 
@@ -55,10 +60,16 @@ void printLimits(void)
 
 void  exploreValidateInt(const char* buff)
 {
-	char* end;
+	char* end = '\0';
+
+	//what is an errno
 	errno = 0;
+
 	int validInt = 0;
+
+	//
 	long intTest = strtol(buff, &end, 10);
+
 	if (end == buff) {
 		fprintf(stderr, "%s: not a decimal number\n", buff);
 	}
