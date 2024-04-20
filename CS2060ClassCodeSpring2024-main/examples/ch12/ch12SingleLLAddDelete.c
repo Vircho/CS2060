@@ -25,6 +25,11 @@ typedef struct node
 	struct node* nextNodePtr;
 }Node;
 
+struct pet {
+	char name[80];
+	int age;
+};
+
 void exploreDoublePointers(void);
 void printList(Node* listPtr);
 void insertNode(Node** headPtr, int number);
@@ -37,7 +42,7 @@ int main(void)
 {
 	puts("\n\nExplore linked lists");
 
-	//
+	// Initialization
 	Node* headNodePtr = NULL;
 	int number = 0;
 	char yesOrNo = ' ';
@@ -93,6 +98,12 @@ int main(void)
 	{
 		exploreDoublePointers();
 	}
+
+
+
+
+	//PET SECTION
+
 
 	return 0;
 }
@@ -292,6 +303,42 @@ void exploreDoublePointers(void)
 	printf("Value stored at pointer *nPtr =  %d\n", *nPtr);
 	printf("Value stored at another pointer **doublenPtr =  %d\n", **doublenPtr);
 
+}
+
+//Function caselessStrcmp
+/*
+* -> Replicates strcmp() while ignoring case
+* Does this by making 2 new strings that are the same as the old ones, but caseless then compares those two
+* Returns: The status of strcmp() after comparing the caseless strings
+* parameters: (str1: The first string to compare) (str2: The second string to compare)
+*/
+int caselessStrcmp(char* str1, char* str2) {
+
+	//Change the strings
+	int str1Place = 0;
+	char str1Char = ' ';
+	char caselessStr1[80];
+	while ((str1Place < 80 - 1) && (str1Char = getchar()) != '\n') {
+
+		caselessStr1[str1Place++] = tolower(str1Char);
+
+	}
+	caselessStr1[str1Place] = '\0';
+
+	int str2Place = 0;
+	char str2Char = ' ';
+	char caselessStr2[80];
+	while ((str2Place < 80 - 1) && (str2Char = getchar()) != '\n') {
+
+		caselessStr2[str2Place++] = tolower(str2Char);
+
+	}
+	caselessStr2[str2Place] = '\0';
+
+	//Compare the caseless strings
+	int caselessReturn = strcmp(caselessStr1, caselessStr2);
+		
+	return caselessReturn;
 }
 
 
