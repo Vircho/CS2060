@@ -72,6 +72,8 @@ typedef struct rider {
 
 } Rider;
 
+//
+
 //Function prototypes
 //Owner Mode Functions
 void ownerMode(struct rideshare* values);

@@ -53,15 +53,17 @@ struct organizationValues {
 
 //Function prototypes
 //Owner Mode Functions
-void ownerMode(struct organizationValues* values);
+bool ownerMode(struct organizationValues* values);
 bool getAdminLogin();
 bool verifyAdminLogin(const char* adminID, const char* adminPass, const char* enteredID, const char* enteredPass);
-void changeValues(struct organizationValues* values);
+void printAverageData(double average[], size_t size);
+
+//SetupMode Functions
+void setupMode(struct organizationValues* values);
 
 //Rider Mode Functions
 void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIES], double averages[]);
 void printSurveyResults(int survey[][SURVEY_CATEGORIES], int takenSurveys);
-char askYesOrNo();
 int estimateMinutes(double miles);
 double calculateFare(struct organizationValues values, int minutes, int miles);
 void getRatings(int survey[][SURVEY_CATEGORIES], const char* categories[], int takenSurveys);
@@ -73,7 +75,8 @@ void removeNewline(char* str1, size_t strSize);
 void clearBuffer();
 double getValidDouble(double min, double max, bool sentinalRelevant);
 bool scanDouble(const char* buffer, double* output);
-void printAverageData(double average[], size_t size);
+void endProgramWithoutSummary();
+char askYesOrNo();
 
 //Array of strings holding the survey categories
 const char* surveyCategories[SURVEY_CATEGORIES] = { "Safety", "Cleanliness", "Comfort" };
@@ -94,11 +97,20 @@ int main(void) {
 	int rideshareSurvey[SURVEY_RIDER_ROWS][SURVEY_CATEGORIES];
 	double categoryAverages[SURVEY_CATEGORIES];
 
-	//Start in ownerMode()
-	ownerMode(valuesPointer);
+	//Hold other variables
+	bool ownerLoggedIn = false;
 
-	//Once Owner is finished, move to rider mode
-	riderMode(valuesPointer, rideshareSurvey, categoryAverages);
+	//Start in ownerMode()
+	ownerLoggedIn = ownerMode(valuesPointer);
+	if (ownerLoggedIn) {
+
+		//Once Owner is finished, move to rider mode
+		riderMode(valuesPointer, rideshareSurvey, categoryAverages);
+	}
+	else {
+		endProgramWithoutSummary();
+	}
+
 }
 
 // function ownerMode
@@ -107,7 +119,7 @@ int main(void) {
 * returns: nothing
 * parameters: (values: the main structure holding the organization data)
 */
-void ownerMode(struct organizationValues* values) {
+bool ownerMode(struct organizationValues* values) {
 
 	//Initialize variables
 	bool loginSuccess = false;
@@ -117,8 +129,11 @@ void ownerMode(struct organizationValues* values) {
 
 	//Check the status of the login attempt and bring admin to change values
 	if (loginSuccess) {
-		changeValues(values);
+		setupMode(values);
 	}
+
+	//Let main know that the owner logged in
+	return loginSuccess;
 }
 
 // function getAdminLogin
@@ -168,8 +183,11 @@ bool getAdminLogin() {
 		if (loginSuccess == false) {
 
 			attempts--;
-			puts("Incorrect ID or Passcode. Please enter again");
-			printf("You have %d attmepts left.\n", attempts);
+			if (attempts != 0) {
+				puts("Incorrect ID or Passcode. Please enter again");
+				printf("You have %d attmepts left.\n", attempts);
+			}
+			
 		}
 
 	} while (loginSuccess == false && attempts > 0);
@@ -203,13 +221,13 @@ bool verifyAdminLogin(const char* adminID, const char* adminPass, const char* en
 	return inputsAreCorrect;
 }
 
-// function changeValues
+// function setupMode
 /*
 * -> Asks the admin to enter data to change all variables in the main structure
 * returns: nothing
 * parameters: (values: structure holding the data to update)
 */
-void changeValues(struct organizationValues* values) {
+void setupMode(struct organizationValues* values) {
 
 	//Change values one-by-one
 	puts("Enter Base Fare");
@@ -321,20 +339,23 @@ void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIE
 				}
 
 			}//end of checking for sentinal
+
+			//else statement ensures that sentinal input does not count as a ride if the owner couldn't log in
+			else {
+				//Estimate amount of minutes user's ride will take
+				riderMinutes = estimateMinutes(riderMiles);
+				printf("Your ride of %.2lf miles is estimated to take %d minutes.\n", riderMiles, riderMinutes);
+
+				//Calculate how much the ride will cost
+				riderCharge = calculateFare(*values, riderMinutes, riderMiles);
+				printf("Your ride will cost $%.2lf\n", riderCharge);
+				puts("...");
+
+				//Ask user to rate their experience.
+				puts("Thank you for riding with us! Would you like to rate your experience today?");
+				isUserRating = askYesOrNo();
+			}
 			
-			//Estimate amount of minutes user's ride will take
-			riderMinutes = estimateMinutes(riderMiles);
-			printf("Your ride of %.2lf miles is estimated to take %d minutes.\n", riderMiles, riderMinutes);
-
-			//Calculate how much the ride will cost
-			riderCharge = calculateFare(*values, riderMinutes, riderMiles);
-			printf("Your ride will cost $%.2lf\n", riderCharge);
-			puts("...");
-		
-			//Ask user to rate their experience.
-			puts("Thank you for riding with us! Would you like to rate your experience today?");
-			isUserRating = askYesOrNo();
-
 			//Check for if user wants to rate their experience
 			if (isUserRating == 'Y' || isUserRating == 'y') {
 
@@ -404,45 +425,6 @@ void printSurveyResults(int survey[][SURVEY_CATEGORIES], int takenSurveys) {
 		}
 	}
 
-}
-
-// function askYesOrNo
-/*
-* -> Asks the user for a yes or no answer, and loops until they do
-* returns: a char representing the users answer y or n
-* parameters: none
-*/
-char askYesOrNo() {
-
-	//Initialize
-	char userAnswer = 'm';
-	bool validAnswer = false;
-
-	//Take in their answer
-	do {
-
-		puts("To answer, put in a Y for yes or a N for no. Words that start with Y or N also work.");
-		userAnswer = getchar();
-		clearBuffer();
-		printf("You have answered %c\n", userAnswer);
-
-		//Check that their answer is valid
-		if (userAnswer == 'y' || userAnswer == 'Y') {
-			puts("You have said yes. Thank you for your answer!");
-			validAnswer = true;
-		}
-		else if (userAnswer == 'n' || userAnswer == 'N') {
-			puts("You have said no. We understand. Have a great rest of your day!");
-			validAnswer = true;
-		}
-		else {
-			puts("Sorry, you did not answer a yes or no.");
-			puts("Enter Y or N for Yes or No. Words that start with Y or N will also work.");
-		}
-
-	} while (!validAnswer);
-	
-	return userAnswer;
 }
 
 // function estimateMinutes
@@ -626,12 +608,17 @@ double getValidDouble(double min, double max, bool sentinalRelevant) {
 		//Once converted to double, check to see if it is in a valid range
 		if (inputtedDataIsDouble == true) {
 
-			if (doubleValue > max || doubleValue < min) {
+			//Checks double data for validity, if the sentinal is *not* relevant and double is not within min/max, data is invalid 
+			if ((doubleValue > max || doubleValue < min) && !sentinalRelevant) {
 				puts("Inputted Data Is Invalid");
 			}
+			
+			//Otherwise, if the owner inputted the sentinal value while the sentinal was relevant, the data is valid
 			else if (doubleValue == SENTINAL_NEG1 && sentinalRelevant) {
 				dataIsGood = true;
 			}
+
+			//Otherwise, the data is valid
 			else {
 				dataIsGood = true;
 			}
@@ -691,4 +678,53 @@ void printAverageData(double average[], size_t size) {
 		printf("%.1f\t", average[place]);
 	}
 
+}
+
+// endProgramWithoutSummary
+/*
+* -> Ends the program without any summary
+* returns: nothing
+* parameters: none
+*/
+void endProgramWithoutSummary() {
+	puts("Ending Program...");
+}
+
+// function askYesOrNo
+/*
+* -> Asks the user for a yes or no answer, and loops until they do
+* returns: a char representing the users answer y or n
+* parameters: none
+*/
+char askYesOrNo() {
+
+	//Initialize
+	char userAnswer = 'm';
+	bool validAnswer = false;
+
+	//Take in their answer
+	do {
+
+		puts("To answer, put in a Y for yes or a N for no. Words that start with Y or N also work.");
+		userAnswer = getchar();
+		clearBuffer();
+		printf("You have answered %c\n", userAnswer);
+
+		//Check that their answer is valid
+		if (userAnswer == 'y' || userAnswer == 'Y') {
+			puts("You have said yes. Thank you for your answer!");
+			validAnswer = true;
+		}
+		else if (userAnswer == 'n' || userAnswer == 'N') {
+			puts("You have said no. We understand. Have a great rest of your day!");
+			validAnswer = true;
+		}
+		else {
+			puts("Sorry, you did not answer a yes or no.");
+			puts("Enter Y or N for Yes or No. Words that start with Y or N will also work.");
+		}
+
+	} while (!validAnswer);
+
+	return userAnswer;
 }
