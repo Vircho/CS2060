@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 //Define Constants
 //Maximum length of a string
@@ -43,29 +44,43 @@
 
 //Structures
 //Holds values that the admin can update
-struct organizationValues {
+struct rideshare {
+
+	//Values that admin inputs
 	double base;
 	double minuteCost;
 	double mileCost;
 	double flatRate;
 	char orgName[STRING_LENGTH];
+
+	//Surveys for the rideshare
+	char survey[SURVEY_RIDER_ROWS][SURVEY_CATEGORIES];
+	char averages[SURVEY_CATEGORIES];
+
+	//Totals for the rideshare
+	int totalRiders;
+	double totalMiles;
+	double totalProfit;
+
+	//Pointer to the next rideshare
+	struct rideshare* nextRideshare;
 };
 
 //Function prototypes
 //Owner Mode Functions
-bool ownerMode(struct organizationValues* values);
+bool ownerMode(struct rideshare* values);
 bool getAdminLogin();
 bool verifyAdminLogin(const char* adminID, const char* adminPass, const char* enteredID, const char* enteredPass);
 void printAverageData(double average[], size_t size);
 
 //SetupMode Functions
-void setupMode(struct organizationValues* values);
+void setupMode(struct rideshare* values);
 
 //Rider Mode Functions
-void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIES], double averages[]);
+void riderMode(struct rideshare* values, int surveys[][SURVEY_CATEGORIES], double averages[]);
 void printSurveyResults(int survey[][SURVEY_CATEGORIES], int takenSurveys);
 int estimateMinutes(double miles);
-double calculateFare(struct organizationValues values, int minutes, int miles);
+double calculateFare(struct rideshare values, int minutes, int miles);
 void getRatings(int survey[][SURVEY_CATEGORIES], const char* categories[], int takenSurveys);
 void calculateCategoryAverages(double average[], int surveyTakers, int survey[][SURVEY_CATEGORIES]);
 void printCategories(const char* categories[], size_t totalCategories);
@@ -78,6 +93,10 @@ bool scanDouble(const char* buffer, double* output);
 void endProgramWithoutSummary();
 char askYesOrNo();
 
+//Linked-list functions
+struct rideshare* addNodeToEnd(struct rideshare* head);
+void printLL(const struct rideshare* head);
+
 //Array of strings holding the survey categories
 const char* surveyCategories[SURVEY_CATEGORIES] = { "Safety", "Cleanliness", "Comfort" };
 
@@ -89,23 +108,19 @@ const char* surveyCategories[SURVEY_CATEGORIES] = { "Safety", "Cleanliness", "Co
 */
 int main(void) {
 
-	//Hold the structure
-	struct organizationValues values = {1.8, 0.25, 1.2, 20, "UCCS Rideshare"};
-	struct organizationValues* valuesPointer = &values;
-
-	//Hold Ratings Arrays
-	int rideshareSurvey[SURVEY_RIDER_ROWS][SURVEY_CATEGORIES];
-	double categoryAverages[SURVEY_CATEGORIES];
+	//Hold the head structure
+	struct rideshare *head = malloc(sizeof(struct rideshare));
+	head->nextRideshare = NULL;
 
 	//Hold other variables
 	bool ownerLoggedIn = false;
 
 	//Start in ownerMode()
-	ownerLoggedIn = ownerMode(valuesPointer);
+	ownerLoggedIn = ownerMode(head);
 	if (ownerLoggedIn) {
 
 		//Once Owner is finished, move to rider mode
-		riderMode(valuesPointer, rideshareSurvey, categoryAverages);
+		riderMode(head, head->survey, head->averages);
 	}
 	else {
 		endProgramWithoutSummary();
@@ -119,19 +134,48 @@ int main(void) {
 * returns: nothing
 * parameters: (values: the main structure holding the organization data)
 */
-bool ownerMode(struct organizationValues* values) {
+bool ownerMode(struct rideshare* values) {
 
 	//Initialize variables
 	bool loginSuccess = false;
+	bool addingMoreRideshares = true;
+	char addingAnother = 'm';
 
 	//Start by getting the admin's verification
 	loginSuccess = getAdminLogin();
 
 	//Check the status of the login attempt and bring admin to change values
 	if (loginSuccess) {
-		setupMode(values);
-	}
 
+		//Setup the first rideshare
+		setupMode(values);
+
+		do {
+
+			//Ask admin to add another rideshare
+			puts("Would you like to add another rideshare?");
+			addingAnother = askYesOrNo();
+
+			//Check if they are adding another rideshare
+			if (addingAnother == 'y') {
+
+				//If adding another rideshare, create a new rideshare to put values in
+				struct rideshare* newRideshare = addNodeToEnd(values);
+
+				//Change the values of this rideshare
+				setupMode(newRideshare);
+
+			}
+			else if (addingAnother == 'n') {
+				addingMoreRideshares = false;
+			}
+
+		} while (addingMoreRideshares);
+
+		//Once all rideshares have been added, print all the rideshares
+		printLL(values);
+
+	}
 	//Let main know that the owner logged in
 	return loginSuccess;
 }
@@ -187,7 +231,7 @@ bool getAdminLogin() {
 				puts("Incorrect ID or Passcode. Please enter again");
 				printf("You have %d attmepts left.\n", attempts);
 			}
-			
+
 		}
 
 	} while (loginSuccess == false && attempts > 0);
@@ -227,7 +271,7 @@ bool verifyAdminLogin(const char* adminID, const char* adminPass, const char* en
 * returns: nothing
 * parameters: (values: structure holding the data to update)
 */
-void setupMode(struct organizationValues* values) {
+void setupMode(struct rideshare* values) {
 
 	//Change values one-by-one
 	puts("Enter Base Fare");
@@ -288,7 +332,7 @@ void endProgram(int users, double totalMiles, int totalMinutes, double totalProf
 * parameters: (values: the structure holding the data that is used to calculate charge) (surveys: the 2d array holding all surveys from users)
 * (averages: 1d array holding the average ratings of each category)
 */
-void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIES], double averages[]) {
+void riderMode(struct rideshare* values, int surveys[][SURVEY_CATEGORIES], double averages[]) {
 
 	//Initialize Variables
 	//Totals
@@ -300,7 +344,7 @@ void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIE
 
 	//Others
 	bool adminLoginSuccess = false;
-	
+
 	//Start the rideshare
 	do {
 
@@ -355,7 +399,7 @@ void riderMode(struct organizationValues* values, int surveys[][SURVEY_CATEGORIE
 				puts("Thank you for riding with us! Would you like to rate your experience today?");
 				isUserRating = askYesOrNo();
 			}
-			
+
 			//Check for if user wants to rate their experience
 			if (isUserRating == 'Y' || isUserRating == 'y') {
 
@@ -452,12 +496,12 @@ int estimateMinutes(double miles) {
 
 // function calculateFare
 /*
-* -> Calculates cost of the ride based on a specific equation 
+* -> Calculates cost of the ride based on a specific equation
 * returns: A double representing the cost of the ride
 * parameters: (values: the structure holding values that are part of the equation) (minutes: amount of minutes the ride will be)
 * (miles: amount of miles the ride will be)
 */
-double calculateFare(struct organizationValues values, int minutes, int miles) {
+double calculateFare(struct rideshare values, int minutes, int miles) {
 
 	double fare = values.base + (values.minuteCost * minutes) + (values.mileCost * miles);
 
@@ -481,7 +525,7 @@ void getRatings(int survey[][SURVEY_CATEGORIES], const char* categories[], int t
 	//Prompts for the user to input a score and lets them know what they can input
 	puts("Thank you for using the UCCS RideShare!");
 	puts("We would like to know how your experience with us was.");
-	printf("Please enter a score for these categories from %d to %d",MIN_SURVEY, MAX_SURVEY);
+	printf("Please enter a score for these categories from %d to %d", MIN_SURVEY, MAX_SURVEY);
 	puts(""); //newline
 	printCategories(categories, SURVEY_CATEGORIES);
 
@@ -500,7 +544,7 @@ void getRatings(int survey[][SURVEY_CATEGORIES], const char* categories[], int t
 
 		//Turn the user score into an int, this will cut off any decimal places
 		userScore = userScoreAsDouble;
-		
+
 		// Once valid data is obtained, put the data into the 2d array at current collumn in the for-loop and row current user as defined in parameters
 		survey[takenSurveys][place] = userScore;
 
@@ -582,7 +626,7 @@ void clearBuffer() {
 /*
 * -> Takes in a string, calls scanDouble to convert the string to a double, and checks the double to see if it is valid
 * returns: a double value that the user inputted
-* parameters: (min: the minimum valid value) (max: the maximum valid value) 
+* parameters: (min: the minimum valid value) (max: the maximum valid value)
 * (sentinalRelevant: whether to expect the sentinal value could be potentially inputted)
 */
 double getValidDouble(double min, double max, bool sentinalRelevant) {
@@ -612,7 +656,7 @@ double getValidDouble(double min, double max, bool sentinalRelevant) {
 			if ((doubleValue > max || doubleValue < min) && !sentinalRelevant) {
 				puts("Inputted Data Is Invalid");
 			}
-			
+
 			//Otherwise, if the owner inputted the sentinal value while the sentinal was relevant, the data is valid
 			else if (doubleValue == SENTINAL_NEG1 && sentinalRelevant) {
 				dataIsGood = true;
@@ -726,5 +770,74 @@ char askYesOrNo() {
 
 	} while (!validAnswer);
 
+	//Update to function as of 4/23/24: automatically tolowers the answer so that the function only returns lowercase y or n
+	userAnswer = tolower(userAnswer);
+
 	return userAnswer;
+}
+
+
+
+
+
+// function addNodeToEnd
+/*
+* -> Adds a node to the end of a linked list, does not sort the linked list
+* returns: The address of the new node
+* parameters: (head: pointer to the head of the linked list)
+*/
+struct rideshare* addNodeToEnd(struct rideshare* head) {
+
+	struct rideshare* newRideshare = malloc(sizeof(struct rideshare));
+	newRideshare->nextRideshare = NULL;
+
+
+	//Make a rideshare pointer to represent parts of the linked list
+	struct rideshare* thisRsPtr = head;
+
+	//Find a place in the linked list to put the rideshare
+	while (thisRsPtr->nextRideshare != NULL) {
+
+		//Move through the linked list until thisRsPtr->nextRsPtr is null, when it's null, it's found the last rideshare 
+		thisRsPtr = thisRsPtr->nextRideshare;
+
+	}
+
+	//Set the new rideshare
+	thisRsPtr->nextRideshare = newRideshare;
+
+	//Return the pointer to the end of the linked list
+	return newRideshare;
+
+}
+
+// function printLL
+/*
+* -> Prints a linked list
+* returns: nothing
+* parameters: (head: pointer to the head of the linked list)
+*/
+void printLL(const struct rideshare* head) {
+
+	//Make a pointer to parts of the linked list
+	struct rideshare* thisRsPtr = head;
+
+	//Start the tables
+	puts("----------------------");
+	puts("All Entered Rideshares");
+	puts("----------------------");
+
+	//Go until the end of the linked list
+	while (thisRsPtr != NULL) {
+
+		printf("%s\n", thisRsPtr->orgName);
+		printf("baseFare = %.1f\n", thisRsPtr->base);
+		printf("costPerMinute = $%.2f\n", thisRsPtr->minuteCost);
+		printf("costPerMile = $%.2f\n", thisRsPtr->mileCost);
+		printf("minFlatRate = $%.2f\n", thisRsPtr->flatRate);
+		printf("\n");
+
+		thisRsPtr = thisRsPtr->nextRideshare;
+	}
+
 }
